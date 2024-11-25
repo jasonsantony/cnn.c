@@ -1,9 +1,9 @@
-#include "utils.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "gemm.h"
+#include "utils.h"
 
 void gemm(int TA, int TB, int M, int N, int K, float ALPHA, float *A, int lda,
           float *B, int ldb, float BETA, float *C, int ldc) {
