@@ -43,7 +43,7 @@ int count_files_in_directory(const char *path) {
 
 // load images from a directory and create label-to-class mapping
 int load_images_with_mapping(
-    const char *base_dir, ImageData *dataset, int *dataset_index,
+    const char *base_dir, image_data *dataset, int *dataset_index,
     char class_names[MAX_CLASSES][MAX_CLASS_NAME_LENGTH]) {
   struct dirent *entry;
   DIR *dp = opendir(base_dir);
@@ -115,7 +115,7 @@ int load_images_with_mapping(
 }
 
 // free the dataset memory
-void free_dataset(ImageData *dataset, int dataset_size) {
+void free_dataset(image_data *dataset, int dataset_size) {
   for (int i = 0; i < dataset_size; i++) {
     free(dataset[i].data);
   }

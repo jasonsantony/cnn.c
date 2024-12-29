@@ -7,7 +7,7 @@
 int main() {
   const char *dataset_path = "../data/train"; // Path to dataset
   int num_images = count_files_in_directory(dataset_path);
-  ImageData *dataset = malloc(num_images * sizeof(ImageData));
+  image_data *dataset = malloc(num_images * sizeof(image_data));
   if (!dataset) {
     printf("Error: Memory allocation failed\n");
     return -1;
