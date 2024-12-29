@@ -202,19 +202,22 @@ void pm(int M, int N, float *A) {
   printf("\n");
 }
 
-void find_replace(char *str, char *orig, char *rep, char *output) {
+void find_replace(const char *str, const char *orig, const char *rep,
+                  char *output, size_t output_size) {
   char buffer[4096] = {0};
   char *p;
 
-  sprintf(buffer, "%s", str);
-  if (!(p = strstr(buffer, orig))) { // Is 'orig' even in 'str'?
-    sprintf(output, "%s", str);
+  // copy the input string into the buffer
+  snprintf(buffer, sizeof(buffer), "%s", str);
+
+  // check if 'orig' is in 'str'
+  if (!(p = strstr(buffer, orig))) {
+    snprintf(output, output_size, "%s", str);
     return;
   }
 
   *p = '\0';
-
-  sprintf(output, "%s%s%s", buffer, rep, p + strlen(orig));
+  snprintf(output, output_size, "%s%s%s", buffer, rep, p + strlen(orig));
 }
 
 float sec(clock_t clocks) { return (float)clocks / CLOCKS_PER_SEC; }
