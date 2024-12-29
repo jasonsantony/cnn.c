@@ -15,7 +15,7 @@ add_executable(cnn ${SOURCES})
 
 target_link_libraries(cnn m)  # Link the math library
 
-# enable warnings and treat them as errors
+# -Wall -Wextra -Werror -fopenmp
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Werror -fopenmp)
 elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
@@ -26,12 +26,6 @@ endif()
 add_custom_target(debug
     COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug -B ${CMAKE_BINARY_DIR}/debug -S ${CMAKE_SOURCE_DIR} && ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/debug --config Debug
     COMMENT "Building in Debug mode with AddressSanitizer"
-)
-
-# release target
-add_custom_target(release
-    COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release -B ${CMAKE_BINARY_DIR}/release -S ${CMAKE_SOURCE_DIR} && ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/release --config Release
-    COMMENT "Building in Release mode"
 )
 
 # add ASan flags for debug builds
