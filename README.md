@@ -9,3 +9,5 @@ This repository is for me to learn about CNNs in a bottom up way using C.
 - blas.c
 - matrix.c
 - gemm.c
+
+## Using [stb_image.h](https://github.com/nothings/stb/tree/master) for image manipulation
