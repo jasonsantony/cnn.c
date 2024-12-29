@@ -6,18 +6,40 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-# set ${SOURCES}
+# Set ${SOURCES}
 file(GLOB SOURCES
     ${CMAKE_SOURCE_DIR}/src/*.c
 )
 
 add_executable(cnn ${SOURCES})
 
-target_link_libraries(cnn m)  # we need to link math library
+target_link_libraries(cnn m)  # Link the math library
 
 # enable warnings and treat them as errors
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    add_compile_options(-Wall -Wextra -Werror)
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_compile_options(/W4 /WX)
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Werror -fopenmp)
+elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
+    add_compile_options(/W4 /WX /openmp)
+endif()
+
+# debug target
+add_custom_target(debug
+    COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug -B ${CMAKE_BINARY_DIR}/debug -S ${CMAKE_SOURCE_DIR} && ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/debug --config Debug
+    COMMENT "Building in Debug mode with AddressSanitizer"
+)
+
+# release target
+add_custom_target(release
+    COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release -B ${CMAKE_BINARY_DIR}/release -S ${CMAKE_SOURCE_DIR} && ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/release --config Release
+    COMMENT "Building in Release mode"
+)
+
+# add ASan flags for debug builds
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(cnn PRIVATE -fsanitize=address -g -O1)
+        target_link_options(cnn PRIVATE -fsanitize=address)
+    elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
+    message(WARNING "AddressSanitizer is not natively supported on MSVC.")
+    endif()
 endif()

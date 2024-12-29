@@ -20,19 +20,19 @@ int count_files_in_directory(const char *path) {
 
   while ((entry = readdir(dp)) != NULL) {
     if (entry->d_type == DT_DIR) {
-      // Skip "." and ".." directories
+      // skip "." and ".." directories
       if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
         continue;
       }
 
-      // Construct the path to the subdirectory
+      // construct the path to the subdirectory
       char sub_dir[512];
       snprintf(sub_dir, sizeof(sub_dir), "%s/%s", path, entry->d_name);
 
-      // Recursively count files in the subdirectory
+      // recursively count files in the subdirectory
       file_count += count_files_in_directory(sub_dir);
     } else if (entry->d_type == DT_REG) {
-      // Count regular files
+      // count regular files
       file_count++;
     }
   }
@@ -41,34 +41,38 @@ int count_files_in_directory(const char *path) {
   return file_count;
 }
 
-// load images from a directory and create label-to-class mapping
-int load_images_with_mapping(
-    const char *base_dir, image_data *dataset, int *dataset_index,
-    char class_names[MAX_CLASSES][MAX_CLASS_NAME_LENGTH]) {
+// load images from directory into a matrix (batch_size, channels * h * w)
+int load_images_into_matrix(
+    const char *data_dir, matrix *data_matrix,
+    char class_names[MAX_CLASSES][MAX_CLASS_NAME_LENGTH], int *labels) {
+
   struct dirent *entry;
-  DIR *dp = opendir(base_dir);
+  DIR *dp = opendir(data_dir);
   if (!dp) {
-    printf("Error: Could not open directory %s\n", base_dir);
+    printf("Error: Could not open directory %s\n", data_dir);
     return -1;
   }
 
+  int dataset_index = 0;
   int label = 0;
-  while ((entry = readdir(dp)) != NULL) {
+  int channels = 3; // rgb
+
+  while ((entry = readdir(dp)) != NULL && dataset_index < data_matrix->rows) {
     if (entry->d_type == DT_DIR) {
-      // Skip "." and ".." entries
+      // skip "." and ".."
       if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
         continue;
       }
 
-      // process class label
+      // process class directory
       char class_dir[512];
-      snprintf(class_dir, sizeof(class_dir), "%s/%s", base_dir, entry->d_name);
+      snprintf(class_dir, sizeof(class_dir), "%s/%s", data_dir, entry->d_name);
+
       // save label to class name mapping
       strncpy(class_names[label], entry->d_name, MAX_CLASS_NAME_LENGTH);
       class_names[label][MAX_CLASS_NAME_LENGTH - 1] = '\0';
       printf("Processing class: %s (label: %d)\n", entry->d_name, label);
 
-      // open class directory
       DIR *class_dp = opendir(class_dir);
       if (!class_dp) {
         printf("Error: Could not open subdirectory %s\n", class_dir);
@@ -76,47 +80,59 @@ int load_images_with_mapping(
       }
 
       struct dirent *img_entry;
-      while ((img_entry = readdir(class_dp)) != NULL) {
+      while ((img_entry = readdir(class_dp)) != NULL &&
+             dataset_index < data_matrix->rows) {
         if (img_entry->d_type == DT_REG) { // regular file
           char img_path[512];
           snprintf(img_path, sizeof(img_path), "%s/%s", class_dir,
                    img_entry->d_name);
 
           // load image using stb_image
-          int width, height, channels;
+          int width, height, img_channels;
           unsigned char *img_data =
-              stbi_load(img_path, &width, &height, &channels, 3); // force RGB
+              stbi_load(img_path, &width, &height, &img_channels, channels);
           if (!img_data) {
             printf("Warning: Could not load image %s\n", img_path);
             continue;
           }
 
-          // add image data to the dataset
-          dataset[*dataset_index].data = img_data;
-          dataset[*dataset_index].width = width;
-          dataset[*dataset_index].height = height;
-          dataset[*dataset_index].channels = 3; // RGB
-          dataset[*dataset_index].label = label;
+          // ensure consistent dimensions for the first image
+          if (dataset_index == 0) {
+            data_matrix->cols = channels * width * height;
+            data_matrix->vals =
+                (float **)malloc(data_matrix->rows * sizeof(float *));
+          } else if (data_matrix->cols != channels * width * height) {
+            printf("Error: Image dimensions are inconsistent (%s has different "
+                   "size).\n",
+                   img_path);
+            stbi_image_free(img_data);
+            continue;
+          }
+
+          // allocate memory for the row and normalize pixel data
+          data_matrix->vals[dataset_index] =
+              (float *)malloc(data_matrix->cols * sizeof(float));
+          for (int i = 0; i < data_matrix->cols; i++) {
+            data_matrix->vals[dataset_index][i] =
+                img_data[i] / 255.0f; // Normalize to [0, 1]
+          }
+
+          // store the label
+          labels[dataset_index] = label;
 
           printf("Loaded: %s (Size: %dx%d, Label: %d)\n", img_path, width,
                  height, label);
 
-          (*dataset_index)++;
+          stbi_image_free(img_data);
+          dataset_index++;
         }
       }
-      closedir(class_dp);
 
-      label++; // Increment label for the next class
+      closedir(class_dp);
+      label++;
     }
   }
+
   closedir(dp);
-
-  return label; // Return the number of classes processed
-}
-
-// free the dataset memory
-void free_dataset(image_data *dataset, int dataset_size) {
-  for (int i = 0; i < dataset_size; i++) {
-    free(dataset[i].data);
-  }
+  return dataset_index; // Return number of images loaded
 }

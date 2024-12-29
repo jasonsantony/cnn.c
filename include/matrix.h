@@ -5,6 +5,7 @@ typedef struct matrix {
   float **vals;
 } matrix;
 
+void free_matrix(matrix m);
 matrix copy_matrix(matrix m);
 void print_matrix(matrix m);
 

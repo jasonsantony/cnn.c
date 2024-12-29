@@ -29,7 +29,8 @@ char *basecfg(char *cfgfile);
 int alphanum_to_int(char c);
 char int_to_alphanum(int i);
 void pm(int M, int N, float *A);
-void find_replace(char *str, char *orig, char *rep, char *output);
+void find_replace(const char *str, const char *orig, const char *rep,
+                  char *output, size_t output_size);
 float sec(clock_t clocks);
 void top_k(float *a, int n, int k, int *index);
 void error(const char *s);
