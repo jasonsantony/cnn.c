@@ -14,3 +14,10 @@ file(GLOB SOURCES
 add_executable(cnn ${SOURCES})
 
 target_link_libraries(cnn m)  # we need to link math library
+
+# enable warnings and treat them as errors
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Werror)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    add_compile_options(/W4 /WX)
+endif()
