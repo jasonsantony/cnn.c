@@ -31,7 +31,7 @@ add_custom_target(debug
 # add ASan flags for debug builds
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-        target_compile_options(cnn PRIVATE -fsanitize=address -g -O1)
+        target_compile_options(cnn PRIVATE -fsanitize=address -g -O0)
         target_link_options(cnn PRIVATE -fsanitize=address)
     elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
     message(WARNING "AddressSanitizer is not natively supported on MSVC.")
