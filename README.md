@@ -1,6 +1,6 @@
 # cnn.c
 
-This repository is for me to learn about CNNs in a bottom up way using C.
+This repository is for me to learn about CNNs by programming them from scratch in C.
 
 ## Files borrowed from the [darknet](https://github.com/pjreddie/darknet/tree/master) repository:
 
