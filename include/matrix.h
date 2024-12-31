@@ -1,6 +1,6 @@
 #pragma once
 
-typedef struct matrix {
+typedef struct _matrix {
   int rows, cols;
   float **vals;
 } matrix;

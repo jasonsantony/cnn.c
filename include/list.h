@@ -1,12 +1,12 @@
 #pragma once
 
-typedef struct node {
+typedef struct _node {
   void *val;
   struct node *next;
   struct node *prev;
 } node;
 
-typedef struct list {
+typedef struct _list {
   int size;
   node *front;
   node *back;

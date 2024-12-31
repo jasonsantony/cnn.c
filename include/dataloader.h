@@ -5,7 +5,7 @@
 #define MAX_CLASSES 1000
 #define MAX_CLASS_NAME_LENGTH 128
 
-typedef struct image_data {
+typedef struct _image_data {
   unsigned char *data;
   int width;
   int height;
