@@ -208,7 +208,7 @@ void find_replace(const char *str, const char *orig, const char *rep,
   char *p;
 
   // copy the input string into the buffer
-  snprintf(buffer, sizeof(buffer), "%s", str);
+  snprintf(buffer, strlen(buffer) + 1, "%s", str);
 
   // check if 'orig' is in 'str'
   if (!(p = strstr(buffer, orig))) {
